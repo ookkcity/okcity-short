@@ -10,7 +10,7 @@
       --accent:#6aa9ff; --danger:#ff6a7a; --ok:#4fe3b6; --line:#243150;
     }
     body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif; background:linear-gradient(180deg,#070b14, #0b1220); color:var(--text); }
-    .wrap{ max-width:980px; margin:0 auto; padding:28px 16px 80px; }
+    .wrap{ max-width:1080px; margin:0 auto; padding:28px 16px 80px; }
     .title{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
     h1{ margin:0; font-size:22px; letter-spacing:.5px; }
     .sub{ color:var(--muted); font-size:13px; }
@@ -26,7 +26,7 @@
     .btn{
       border:1px solid rgba(106,169,255,.45);
       background:rgba(106,169,255,.14); color:var(--text);
-      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
     }
     .btn:hover{ background:rgba(106,169,255,.22); }
     .btn.secondary{ border-color:rgba(170,182,214,.35); background:rgba(170,182,214,.10); }
@@ -60,13 +60,16 @@
       background:#0b1326; color:var(--muted); font-size:12px;
       text-align:left; padding:10px 10px; border-bottom:1px solid var(--line);
     }
-    tbody td{ padding:10px 10px; border-bottom:1px solid rgba(36,49,80,.55); vertical-align:top; }
+    tbody td{ padding:12px 10px; border-bottom:1px solid rgba(36,49,80,.55); vertical-align:top; }
     tbody tr:last-child td{ border-bottom:none; }
     .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
     .small{ font-size:12px; color:var(--muted); }
     .actions{ display:flex; gap:8px; flex-wrap:wrap; }
     .pill{ display:inline-block; padding:2px 8px; border:1px solid rgba(170,182,214,.25); border-radius:999px; color:var(--muted); font-size:12px; }
     .hidden{ display:none !important; }
+    
+    .url-cell { display: flex; flex-direction: column; gap: 8px; }
+    .note-input { font-size: 13px; opacity: 0.8; }
   </style>
 </head>
 <body>
@@ -93,7 +96,7 @@
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
         <div>
           <div style="font-weight:700;">歷史紀錄</div>
-          <div class="small">在此設置</div>
+          <div class="small">管理與修改</div>
         </div>
         <div style="display:flex; gap:10px;">
           <button class="btn secondary" onclick="loadList()">重新整理</button>
@@ -107,10 +110,9 @@
         <table>
           <thead>
             <tr>
-              <th style="width:120px;">code</th>
-              <th>url</th>
-              <th style="width:220px;">note</th>
-              <th style="width:220px;">時間</th>
+              <th style="width:100px;">短碼</th>
+              <th>目標網址 / 備註</th>
+              <th style="width:160px;">時間紀錄</th>
               <th style="width:180px;">操作</th>
             </tr>
           </thead>
@@ -120,7 +122,6 @@
     </div>
   </div>
 
-  <!-- 左下角登入 icon -->
   <div class="login-fab" onclick="toggleLogin()" title="登入/登出">
     <span>🔑</span>
   </div>
@@ -130,8 +131,8 @@
     /***************
      * Config
      ***************/
-    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzBFIRbeQrTtZvplIrMdaduZefCireEWnhJoEf4NjUydJOO8oJx4H3MKEGPt2HSpuhe3g/exec'; // ←換成你的
-    const ADMIN_PASSWORD = '123'; // 假登入密碼
+    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzBFIRbeQrTtZvplIrMdaduZefCireEWnhJoEf4NjUydJOO8oJx4H3MKEGPt2HSpuhe3g/exec';
+    const ADMIN_PASSWORD = '123'; 
 
     /***************
      * State
@@ -162,7 +163,7 @@
         };
         const script = document.createElement('script');
         script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
-        script.onerror = () => reject(new Error('JSONP load failed'));
+        script.onerror = () => reject(new Error('連線失敗'));
         document.body.appendChild(script);
       });
     }
@@ -182,6 +183,8 @@
      ***************/
     async function createShort(){
       const longUrl = document.getElementById('longUrl').value.trim();
+      if(!longUrl) return alert('請輸入網址');
+      
       setMsg('createMsg', '正在搞…別催…', '');
       document.getElementById('createActions').innerHTML = '';
 
@@ -191,20 +194,18 @@
 
       try{
         const res = await jsonp(u.toString());
-        if(!res.ok) throw new Error(res.error || 'create failed');
+        if(!res.ok) throw new Error(res.error || '生成失敗');
 
-      const su = shortUrlFromCode(res.code);
-      setMsg('createMsg', `完成：${su}`, 'ok');
-      
-      const actions = document.getElementById('createActions');
-      actions.innerHTML = `
-        <button class="btn secondary" onclick="copyText('${res.code}')">複製短碼</button>
-        <button class="btn secondary" onclick="copyText('${su}')">複製短網址</button>
-        <a class="btn" href="${su}" target="_blank" rel="noopener" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">開啟</a>
-      `;
+        const su = shortUrlFromCode(res.code);
+        setMsg('createMsg', `完成：${su}`, 'ok');
+        
+        const actions = document.getElementById('createActions');
+        actions.innerHTML = `
+          <button class="btn secondary" onclick="copyText('${res.code}')">複製短碼</button>
+          <button class="btn secondary" onclick="copyText('${su}')">複製短網址</button>
+          <a class="btn" href="${su}" target="_blank" rel="noopener">開啟</a>
+        `;
 
-
-        // 若已登入，順便刷新列表
         if(isLoggedIn()){
           loadList();
         }
@@ -218,18 +219,15 @@
      ***************/
     async function toggleLogin(){
       if(isLoggedIn()){
-        logout();
+        if(confirm('確定要登出？')) logout();
         return;
       }
       const pwd = prompt('輸入密碼：');
       if(pwd === null) return;
-
       if(String(pwd).trim() !== ADMIN_PASSWORD){
         alert('密碼錯誤');
         return;
       }
-
-      // 設 token（這裡就用 123）
       adminToken = ADMIN_PASSWORD;
       localStorage.setItem(storageKey, adminToken);
       setUI();
@@ -249,8 +247,7 @@
      ***************/
     async function loadList(){
       if(!isLoggedIn()) return;
-
-      setMsg('listMsg', '還在跑你慢慢等…', '');
+      setMsg('listMsg', '讀取中…', '');
 
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'list');
@@ -258,22 +255,16 @@
 
       try{
         const res = await jsonp(u.toString());
-        if(!res.ok) throw new Error(res.error || 'list failed');
-
+        if(!res.ok) throw new Error(res.error || '讀取失敗');
         renderTable(res.items || []);
-        setMsg('listMsg', `共 ${res.items.length} 筆`, 'ok');
+        setMsg('listMsg', `共 ${res.items.length} 筆資料`, 'ok');
       }catch(err){
         setMsg('listMsg', '載入失敗：' + err.message, 'err');
       }
     }
 
     function escapeHtml(s){
-      return String(s)
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'","&#39;");
+      return String(s || "").replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");
     }
 
     function renderTable(items){
@@ -282,33 +273,30 @@
 
       for(const it of items){
         const tr = document.createElement('tr');
-
         const su = shortUrlFromCode(it.code);
 
         tr.innerHTML = `
           <td class="mono">
-            <div><a href="${escapeHtml(su)}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none;">${escapeHtml(it.code)}</a></div>
-            <div class="small">→ 開啟</div>
+            <a href="${escapeHtml(su)}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none; font-weight:bold;">${escapeHtml(it.code)}</a>
+            <div class="small" style="margin-top:4px;">→ <a href="${escapeHtml(su)}" target="_blank" style="color:inherit;">開啟</a></div>
           </td>
 
           <td>
-            <input data-code="${escapeHtml(it.code)}" class="urlInput" value="${escapeHtml(it.url || '')}" />
-            <div class="small mono" style="margin-top:6px; opacity:.9;">${escapeHtml(it.url || '')}</div>
-          </td>
-
-          <td>
-            <textarea data-code="${escapeHtml(it.code)}" class="noteInput" rows="2" placeholder="備註（可選）">${escapeHtml(it.note || '')}</textarea>
+            <div class="url-cell">
+              <input data-code="${escapeHtml(it.code)}" class="urlInput" value="${escapeHtml(it.url)}" placeholder="目標網址" />
+              <textarea data-code="${escapeHtml(it.code)}" class="noteInput note-input" rows="2" placeholder="備註內容...">${escapeHtml(it.note || '')}</textarea>
+            </div>
           </td>
 
           <td class="small">
-            <div>建立：<span class="mono">${escapeHtml((it.createdAt || '').replace('T',' ').replace('Z',''))}</span></div>
-            <div>更新：<span class="mono">${escapeHtml((it.updatedAt || '').replace('T',' ').replace('Z',''))}</span></div>
+            <div style="margin-bottom:4px;">建立：<br><span class="mono">${escapeHtml((it.createdAt || '').split('.')[0].replace('T',' '))}</span></div>
+            <div>更新：<br><span class="mono">${escapeHtml((it.updatedAt || '').split('.')[0].replace('T',' '))}</span></div>
           </td>
 
           <td>
             <div class="actions">
-              <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存</button>
-              <button class="btn secondary" onclick="copyText('${escapeHtml(su)}')">複製短網址</button>
+              <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存修改</button>
+              <button class="btn secondary" onclick="copyText('${escapeHtml(su)}')">複製連結</button>
               <button class="btn danger" onclick="deleteRow('${escapeHtml(it.code)}')">刪除</button>
             </div>
           </td>
@@ -319,10 +307,9 @@
 
     async function saveRow(code){
       if(!isLoggedIn()) return;
-
       const urlEl = document.querySelector(`.urlInput[data-code="${CSS.escape(code)}"]`);
       const noteEl = document.querySelector(`.noteInput[data-code="${CSS.escape(code)}"]`);
-      const url = (urlEl ? urlEl.value : '').trim();
+      const url = urlEl ? urlEl.value.trim() : '';
       const note = noteEl ? noteEl.value : '';
 
       const u = new URL(GAS_ENDPOINT);
@@ -332,59 +319,49 @@
       u.searchParams.set('url', url);
       u.searchParams.set('note', note);
 
-      setMsg('listMsg', `更新 ${code} 中…`, '');
-
+      setMsg('listMsg', `正在儲存 ${code}…`, '');
       try{
         const res = await jsonp(u.toString());
-        if(!res.ok) throw new Error(res.error || 'update failed');
-        setMsg('listMsg', `已更新：${code}`, 'ok');
-        // 刷新時間欄位（簡單做法：整表重載）
+        if(!res.ok) throw new Error(res.error || '更新失敗');
+        setMsg('listMsg', `已儲存：${code}`, 'ok');
         await loadList();
       }catch(err){
-        setMsg('listMsg', `更新失敗：${err.message}`, 'err');
+        setMsg('listMsg', `出錯：${err.message}`, 'err');
       }
     }
 
     async function deleteRow(code){
-  if(!isLoggedIn()) return;
+      if(!isLoggedIn()) return;
+      if(!confirm(`確定要刪除 ${code} 嗎？此操作不可還原。`)) return;
 
-  const ok = confirm(`確定要刪除短碼 ${code} 嗎？這會從試算表移除，無法復原。`);
-  if(!ok) return;
+      const u = new URL(GAS_ENDPOINT);
+      u.searchParams.set('action', 'delete');
+      u.searchParams.set('token', adminToken);
+      u.searchParams.set('code', code);
 
-  const u = new URL(GAS_ENDPOINT);
-  u.searchParams.set('action', 'delete');
-  u.searchParams.set('token', adminToken);
-  u.searchParams.set('code', code);
-
-  setMsg('listMsg', `刪除 ${code} 中…`, '');
-
-  try{
-    const res = await jsonp(u.toString());
-    if(!res.ok) throw new Error(res.error || 'delete failed');
-
-    setMsg('listMsg', `已刪除：${code}`, 'ok');
-    await loadList();
-  }catch(err){
-    setMsg('listMsg', `刪除失敗：${err.message}`, 'err');
-  }
-}
-
+      setMsg('listMsg', `正在刪除 ${code}…`, '');
+      try{
+        const res = await jsonp(u.toString());
+        if(!res.ok) throw new Error(res.error || '刪除失敗');
+        setMsg('listMsg', `已刪除：${code}`, 'ok');
+        await loadList();
+      }catch(err){
+        setMsg('listMsg', `出錯：${err.message}`, 'err');
+      }
+    }
 
     async function copyText(text){
       try{
         await navigator.clipboard.writeText(text);
         setMsg('createMsg', '已複製：' + text, 'ok');
       }catch(e){
-        // fallback
-        prompt('複製這段：', text);
+        prompt('請手動複製：', text);
       }
     }
 
     // init
     setUI();
-    if(isLoggedIn()){
-      loadList();
-    }
+    if(isLoggedIn()) loadList();
   </script>
 </body>
 </html>
