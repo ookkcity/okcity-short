@@ -86,6 +86,7 @@
         <button class="btn" onclick="createShort()">生成</button>
       </div>
       <div class="msg" id="createMsg"></div>
+      <div id="createActions" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
     </div>
 
     <div class="card hidden" id="adminCard">
@@ -182,6 +183,7 @@
     async function createShort(){
       const longUrl = document.getElementById('longUrl').value.trim();
       setMsg('createMsg', '處理中…', '');
+      document.getElementById('createActions').innerHTML = '';
 
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'create');
@@ -191,8 +193,16 @@
         const res = await jsonp(u.toString());
         if(!res.ok) throw new Error(res.error || 'create failed');
 
-        const su = shortUrlFromCode(res.code);
-        setMsg('createMsg', `完成：${su}`, 'ok');
+      const su = shortUrlFromCode(res.code);
+      setMsg('createMsg', `完成：${su}`, 'ok');
+      
+      const actions = document.getElementById('createActions');
+      actions.innerHTML = `
+        <button class="btn secondary" onclick="copyText('${res.code}')">複製短碼</button>
+        <button class="btn secondary" onclick="copyText('${su}')">複製短網址</button>
+        <a class="btn" href="${su}" target="_blank" rel="noopener" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">開啟</a>
+      `;
+
 
         // 若已登入，順便刷新列表
         if(isLoggedIn()){
