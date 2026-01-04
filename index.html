@@ -130,7 +130,7 @@
     /***************
      * Config
      ***************/
-    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwXCBMkbksnqB6TjM9j0iiANL_UaYmqL4LiR-N6lh0aZbnHftoxZnBoLDQKOOO968zM2w/exec'; // ←換成你的
+    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzBFIRbeQrTtZvplIrMdaduZefCireEWnhJoEf4NjUydJOO8oJx4H3MKEGPt2HSpuhe3g/exec'; // ←換成你的
     const ADMIN_PASSWORD = '123'; // 假登入密碼
 
     /***************
@@ -309,6 +309,7 @@
             <div class="actions">
               <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存</button>
               <button class="btn secondary" onclick="copyText('${escapeHtml(su)}')">複製短網址</button>
+              <button class="btn danger" onclick="deleteRow('${escapeHtml(it.code)}')">刪除</button>
             </div>
           </td>
         `;
@@ -343,6 +344,31 @@
         setMsg('listMsg', `更新失敗：${err.message}`, 'err');
       }
     }
+
+    async function deleteRow(code){
+  if(!isLoggedIn()) return;
+
+  const ok = confirm(`確定要刪除短碼 ${code} 嗎？這會從試算表移除，無法復原。`);
+  if(!ok) return;
+
+  const u = new URL(GAS_ENDPOINT);
+  u.searchParams.set('action', 'delete');
+  u.searchParams.set('token', adminToken);
+  u.searchParams.set('code', code);
+
+  setMsg('listMsg', `刪除 ${code} 中…`, '');
+
+  try{
+    const res = await jsonp(u.toString());
+    if(!res.ok) throw new Error(res.error || 'delete failed');
+
+    setMsg('listMsg', `已刪除：${code}`, 'ok');
+    await loadList();
+  }catch(err){
+    setMsg('listMsg', `刪除失敗：${err.message}`, 'err');
+  }
+}
+
 
     async function copyText(text){
       try{
