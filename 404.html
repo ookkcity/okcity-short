@@ -2,20 +2,31 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Redirecting…</title>
+  <style>
+    body{ font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif; background:#0b1220; color:#e8eefc; margin:0; }
+    .wrap{ max-width:720px; margin:40px auto; padding:0 16px; }
+    .muted{ color:#aab6d6; }
+    a{ color:#6aa9ff; text-decoration:none; }
+    code{ background:#111a2e; border:1px solid #243150; padding:2px 6px; border-radius:8px; }
+  </style>
 </head>
 <body>
-  <p id="msg">查詢短網址中…</p>
+  <div class="wrap">
+    <h1 style="font-size:18px; margin:0 0 10px;">查詢短網址中…</h1>
+    <p class="muted" id="msg">請稍候</p>
+    <p class="muted"><a href="/">回到生成器首頁</a></p>
+  </div>
 
   <script>
-    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxhm9VNnRHq07QxQeSfRC3eyq0Mc50oS0UVSUDCS_cfIxhC5pMG-CC5bsqEa9h8q6LiUQ/exec';
+    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxhOU1QfoXkqBIas1HezuA6ICKdX4kZBQ9twd4UbkFRWbvcJ-GZGEVcvs9s8bcsX2aYMQ/exec'; // ←換成你的
 
-    function jsonp(url) {
+    function jsonp(url){
       return new Promise((resolve, reject) => {
         const cb = 'cb_' + Math.random().toString(36).slice(2);
         window[cb] = (data) => {
-          delete window[cb];
+          try { delete window[cb]; } catch(e){}
           script.remove();
           resolve(data);
         };
@@ -28,11 +39,19 @@
 
     (async () => {
       const msg = document.getElementById('msg');
+
+      // 取短碼：/abc123 → abc123
       const code = location.pathname.replace(/^\/+/, '').trim();
 
-      // 如果是根目錄 404（例如輸入 s.okcity.tw/ 不該來這），就回首頁
-      if (!code) {
+      // 若有人 404 到根目錄（理論上不會），回首頁
+      if(!code){
         location.replace('/');
+        return;
+      }
+
+      // 避免把 favicon.ico 等資源誤當短碼（可選）
+      if(code.toLowerCase() === 'favicon.ico'){
+        msg.textContent = 'Not found';
         return;
       }
 
@@ -40,17 +59,16 @@
       u.searchParams.set('action', 'resolve');
       u.searchParams.set('code', code);
 
-      try {
+      try{
         const res = await jsonp(u.toString());
-        if (res.ok && res.url) {
+        if(res.ok && res.url){
           msg.textContent = '轉址中…';
-          // 用 replace 避免使用者按返回鍵又回到這個 404
           location.replace(res.url);
-        } else {
-          msg.textContent = '找不到這個短碼：' + code;
+        }else{
+          msg.innerHTML = '找不到短碼：<code>' + code + '</code>';
         }
-      } catch (e) {
-        msg.textContent = '查詢失敗：' + e.message;
+      }catch(err){
+        msg.textContent = '查詢失敗：' + err.message;
       }
     })();
   </script>
