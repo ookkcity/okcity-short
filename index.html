@@ -10,66 +10,103 @@
       --accent:#6aa9ff; --danger:#ff6a7a; --ok:#4fe3b6; --line:#243150;
     }
     body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif; background:linear-gradient(180deg,#070b14, #0b1220); color:var(--text); }
-    .wrap{ max-width:1080px; margin:0 auto; padding:28px 16px 80px; }
-    .title{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-    h1{ margin:0; font-size:22px; letter-spacing:.5px; }
-    .sub{ color:var(--muted); font-size:13px; }
+    .wrap{ max-width:1080px; margin:0 auto; padding:20px 16px 80px; }
+    .title{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom: 20px; }
+    h1{ margin:0; font-size:20px; letter-spacing:.5px; }
+    .sub{ color:var(--muted); font-size:12px; }
     .card{ margin-top:16px; background:rgba(17,26,46,.85); border:1px solid var(--line); border-radius:14px; padding:16px; }
-    label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+    label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
+    
     input, textarea{
       width:100%; box-sizing:border-box; border-radius:12px; border:1px solid var(--line);
-      background:#0b1326; color:var(--text); padding:12px 12px; font-size:15px;
-      outline:none;
+      background:#0b1326; color:var(--text); padding:12px; font-size:15px;
+      outline:none; appearance: none;
     }
     input:focus, textarea:focus{ border-color:rgba(106,169,255,.7); box-shadow:0 0 0 3px rgba(106,169,255,.15); }
-    .row{ display:grid; grid-template-columns: 1fr auto; gap:12px; align-items:end; }
+    
+    .row{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end; }
+    
     .btn{
       border:1px solid rgba(106,169,255,.45);
       background:rgba(106,169,255,.14); color:var(--text);
-      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
+      padding:12px 16px; border-radius:12px; cursor:pointer; font-weight:600; 
+      text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
+      transition: 0.2s; font-size: 14px;
     }
     .btn:hover{ background:rgba(106,169,255,.22); }
+    .btn:active{ transform: scale(0.98); }
     .btn.secondary{ border-color:rgba(170,182,214,.35); background:rgba(170,182,214,.10); }
     .btn.danger{ border-color:rgba(255,106,122,.45); background:rgba(255,106,122,.12); }
-    .msg{ margin-top:10px; font-size:14px; color:var(--muted); }
+    
+    .msg{ margin-top:10px; font-size:13px; color:var(--muted); min-height: 18px; }
     .msg.ok{ color:var(--ok); }
     .msg.err{ color:var(--danger); }
 
-    /* login icon */
+    /* FAB */
     .login-fab{
       position:fixed; left:18px; bottom:18px;
       width:46px; height:46px; border-radius:14px;
       border:1px solid var(--line);
       background:rgba(17,26,46,.92);
       display:flex; align-items:center; justify-content:center;
-      cursor:pointer; user-select:none;
+      cursor:pointer; user-select:none; z-index: 100;
       box-shadow: 0 10px 24px rgba(0,0,0,.35);
     }
-    .login-fab:hover{ transform: translateY(-1px); }
-    .login-fab span{ font-size:20px; }
     .badge{
       position:fixed; left:74px; bottom:28px;
       padding:6px 10px; border-radius:999px;
       border:1px solid var(--line); background:rgba(17,26,46,.92);
-      font-size:12px; color:var(--muted);
+      font-size:12px; color:var(--muted); z-index: 99;
     }
 
-    /* table */
-    table{ width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:14px; border:1px solid var(--line); }
+    /* RWD Table */
+    table{ width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; }
+    thead{ background:#0b1326; }
     thead th{
-      background:#0b1326; color:var(--muted); font-size:12px;
-      text-align:left; padding:10px 10px; border-bottom:1px solid var(--line);
+      color:var(--muted); font-size:12px;
+      text-align:left; padding:12px 10px; border-bottom:1px solid var(--line);
     }
     tbody td{ padding:12px 10px; border-bottom:1px solid rgba(36,49,80,.55); vertical-align:top; }
-    tbody tr:last-child td{ border-bottom:none; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    .small{ font-size:12px; color:var(--muted); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .small{ font-size:12px; color:var(--muted); line-height: 1.5; }
     .actions{ display:flex; gap:8px; flex-wrap:wrap; }
-    .pill{ display:inline-block; padding:2px 8px; border:1px solid rgba(170,182,214,.25); border-radius:999px; color:var(--muted); font-size:12px; }
+    .pill{ display:inline-block; padding:2px 8px; border:1px solid rgba(170,182,214,.25); border-radius:999px; color:var(--muted); font-size:11px; }
     .hidden{ display:none !important; }
     
     .url-cell { display: flex; flex-direction: column; gap: 8px; }
-    .note-input { font-size: 13px; opacity: 0.8; }
+
+    /* 手機版優化核心碼 */
+    @media (max-width: 600px) {
+      .row { grid-template-columns: 1fr; }
+      .row .btn { width: 100%; }
+      
+      thead { display: none; } /* 隱藏表頭 */
+      table, tbody, tr, td { display: block; width: 100%; box-sizing: border-box; }
+      tr { 
+        margin-bottom: 16px; 
+        border: 1px solid var(--line); 
+        border-radius: 14px; 
+        background: rgba(255,255,255,0.02);
+        padding: 12px;
+      }
+      td { border: none; padding: 8px 0; }
+      
+      /* 讓每個欄位看起來像獨立條目 */
+      td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        color: var(--accent);
+        margin-bottom: 4px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      
+      .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .actions .btn.danger { grid-column: span 2; } /* 刪除鈕拉長防止誤觸 */
+      
+      .time-info { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px; margin-top: 4px; }
+    }
   </style>
 </head>
 <body>
@@ -77,43 +114,39 @@
     <div class="title">
       <div>
         <h1>OKCTㄉ短網址生成器</h1>
-        <div class="sub">首頁<span class="mono"> </span></div>
+        <div class="sub">首頁 <span class="pill" id="loginStatePill">此網站BY 典典</span></div>
       </div>
-      <div class="pill" id="loginStatePill">未登入</div>
     </div>
 
     <div class="card">
       <label>原網址（需含 https:// 或 http://）</label>
       <div class="row">
         <input id="longUrl" placeholder="貼上網址" />
-        <button class="btn" onclick="createShort()">生成</button>
+        <button class="btn" onclick="createShort()">生成短連結</button>
       </div>
       <div class="msg" id="createMsg"></div>
-      <div id="createActions" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+      <div id="createActions" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;"></div>
     </div>
 
     <div class="card hidden" id="adminCard">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:700;">歷史紀錄</div>
-          <div class="small">管理與修改</div>
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn secondary" onclick="loadList()">重新整理</button>
-          <button class="btn danger" onclick="logout()">登出</button>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 15px;">
+        <div style="font-weight:700;">歷史管理</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn secondary" style="padding: 8px 12px;" onclick="loadList()">重新整理</button>
+          <button class="btn danger" style="padding: 8px 12px;" onclick="logout()">登出</button>
         </div>
       </div>
 
       <div class="msg" id="listMsg"></div>
 
-      <div style="margin-top:12px; overflow:auto;">
-        <table>
+      <div style="margin-top:12px;">
+        <table id="listTable">
           <thead>
             <tr>
-              <th style="width:100px;">短碼</th>
-              <th>目標網址 / 備註</th>
-              <th style="width:160px;">時間紀錄</th>
-              <th style="width:180px;">操作</th>
+              <th style="width:15%">短碼</th>
+              <th style="width:50%">目標網址 / 備註</th>
+              <th style="width:15%">紀錄</th>
+              <th style="width:20%">操作</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -125,34 +158,22 @@
   <div class="login-fab" onclick="toggleLogin()" title="登入/登出">
     <span>🔑</span>
   </div>
-  <div class="badge" id="badge"> </div>
+  <div class="badge" id="badge">ok._.city</div>
 
   <script>
-    /***************
-     * Config
-     ***************/
     const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzBFIRbeQrTtZvplIrMdaduZefCireEWnhJoEf4NjUydJOO8oJx4H3MKEGPt2HSpuhe3g/exec';
     const ADMIN_PASSWORD = '123'; 
-
-    /***************
-     * State
-     ***************/
     const storageKey = 'okcity_short_admin_token';
     let adminToken = localStorage.getItem(storageKey) || '';
 
-    function isLoggedIn(){
-      return !!adminToken;
-    }
+    function isLoggedIn(){ return !!adminToken; }
 
     function setUI(){
       document.getElementById('adminCard').classList.toggle('hidden', !isLoggedIn());
-      document.getElementById('loginStatePill').textContent = isLoggedIn() ? '已登入' : '此網站BY 典典';
+      document.getElementById('loginStatePill').textContent = isLoggedIn() ? '已登入管理模式' : '此網站BY 典典';
       document.getElementById('badge').textContent = isLoggedIn() ? '管理模式' : 'ok._.city';
     }
 
-    /***************
-     * JSONP helper
-     ***************/
     function jsonp(url){
       return new Promise((resolve, reject) => {
         const cb = 'cb_' + Math.random().toString(36).slice(2);
@@ -163,7 +184,7 @@
         };
         const script = document.createElement('script');
         script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
-        script.onerror = () => reject(new Error('連線失敗'));
+        script.onerror = () => reject(new Error('連線超時'));
         document.body.appendChild(script);
       });
     }
@@ -178,14 +199,11 @@
       el.className = 'msg' + (type ? (' ' + type) : '');
     }
 
-    /***************
-     * Create
-     ***************/
     async function createShort(){
       const longUrl = document.getElementById('longUrl').value.trim();
       if(!longUrl) return alert('請輸入網址');
       
-      setMsg('createMsg', '正在搞…別催…', '');
+      setMsg('createMsg', '正在生成中...', '');
       document.getElementById('createActions').innerHTML = '';
 
       const u = new URL(GAS_ENDPOINT);
@@ -194,60 +212,48 @@
 
       try{
         const res = await jsonp(u.toString());
-        if(!res.ok) throw new Error(res.error || '生成失敗');
+        if(!res.ok) throw new Error(res.error || '失敗');
 
         const su = shortUrlFromCode(res.code);
-        setMsg('createMsg', `完成：${su}`, 'ok');
+        setMsg('createMsg', `成功生成！`, 'ok');
         
-        const actions = document.getElementById('createActions');
-        actions.innerHTML = `
-          <button class="btn secondary" onclick="copyText('${res.code}')">複製短碼</button>
-          <button class="btn secondary" onclick="copyText('${su}')">複製短網址</button>
-          <a class="btn" href="${su}" target="_blank" rel="noopener">開啟</a>
+        document.getElementById('createActions').innerHTML = `
+          <button class="btn secondary" onclick="copyText('${su}')">複製連結</button>
+          <a class="btn" href="${su}" target="_blank">直接開啟</a>
         `;
-
-        if(isLoggedIn()){
-          loadList();
-        }
+        if(isLoggedIn()) loadList();
       }catch(err){
         setMsg('createMsg', '失敗：' + err.message, 'err');
       }
     }
 
-    /***************
-     * Login/Logout
-     ***************/
     async function toggleLogin(){
       if(isLoggedIn()){
         if(confirm('確定要登出？')) logout();
         return;
       }
-      const pwd = prompt('輸入密碼：');
-      if(pwd === null) return;
-      if(String(pwd).trim() !== ADMIN_PASSWORD){
-        alert('密碼錯誤');
+      const pwd = prompt('管理員密碼：');
+      if(!pwd) return;
+      if(pwd.trim() !== ADMIN_PASSWORD){
+        alert('密碼不正確');
         return;
       }
       adminToken = ADMIN_PASSWORD;
       localStorage.setItem(storageKey, adminToken);
       setUI();
-      await loadList();
+      loadList();
     }
 
     function logout(){
       adminToken = '';
       localStorage.removeItem(storageKey);
       setUI();
-      setMsg('listMsg', '', '');
       document.getElementById('tbody').innerHTML = '';
     }
 
-    /***************
-     * List
-     ***************/
     async function loadList(){
       if(!isLoggedIn()) return;
-      setMsg('listMsg', '讀取中…', '');
+      setMsg('listMsg', '同步雲端資料中...', '');
 
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'list');
@@ -257,60 +263,55 @@
         const res = await jsonp(u.toString());
         if(!res.ok) throw new Error(res.error || '讀取失敗');
         renderTable(res.items || []);
-        setMsg('listMsg', `共 ${res.items.length} 筆資料`, 'ok');
+        setMsg('listMsg', `目前共有 ${res.items.length} 筆紀錄`, 'ok');
       }catch(err){
-        setMsg('listMsg', '載入失敗：' + err.message, 'err');
+        setMsg('listMsg', '讀取失敗：' + err.message, 'err');
       }
     }
 
     function escapeHtml(s){
-      return String(s || "").replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");
+      return String(s || "").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     function renderTable(items){
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
 
-      for(const it of items){
+      items.forEach(it => {
         const tr = document.createElement('tr');
         const su = shortUrlFromCode(it.code);
 
         tr.innerHTML = `
-          <td class="mono">
-            <a href="${escapeHtml(su)}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none; font-weight:bold;">${escapeHtml(it.code)}</a>
-            <div class="small" style="margin-top:4px;">→ <a href="${escapeHtml(su)}" target="_blank" style="color:inherit;">開啟</a></div>
+          <td data-label="短碼 (點擊預覽)">
+            <a href="${escapeHtml(su)}" target="_blank" class="mono" style="color:var(--accent); text-decoration:none; font-weight:bold; font-size:16px;">${escapeHtml(it.code)}</a>
           </td>
-
-          <td>
+          <td data-label="目標與備註">
             <div class="url-cell">
-              <input data-code="${escapeHtml(it.code)}" class="urlInput" value="${escapeHtml(it.url)}" placeholder="目標網址" />
-              <textarea data-code="${escapeHtml(it.code)}" class="noteInput note-input" rows="2" placeholder="備註內容...">${escapeHtml(it.note || '')}</textarea>
+              <input data-code="${escapeHtml(it.code)}" class="urlInput" value="${escapeHtml(it.url)}" placeholder="https://" />
+              <textarea data-code="${escapeHtml(it.code)}" class="noteInput note-input" rows="2" placeholder="輸入備註內容...">${escapeHtml(it.note || '')}</textarea>
             </div>
           </td>
-
-          <td class="small">
-            <div style="margin-bottom:4px;">建立：<br><span class="mono">${escapeHtml((it.createdAt || '').split('.')[0].replace('T',' '))}</span></div>
-            <div>更新：<br><span class="mono">${escapeHtml((it.updatedAt || '').split('.')[0].replace('T',' '))}</span></div>
+          <td data-label="紀錄資訊">
+            <div class="time-info">
+              <div class="small">建：<span class="mono">${escapeHtml((it.createdAt || '').split('T')[0])}</span></div>
+              <div class="small">更：<span class="mono">${escapeHtml((it.updatedAt || '').split('T')[0])}</span></div>
+            </div>
           </td>
-
-          <td>
+          <td data-label="功能操作">
             <div class="actions">
-              <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存修改</button>
-              <button class="btn secondary" onclick="copyText('${escapeHtml(su)}')">複製連結</button>
+              <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存</button>
+              <button class="btn secondary" onclick="copyText('${escapeHtml(su)}')">複製</button>
               <button class="btn danger" onclick="deleteRow('${escapeHtml(it.code)}')">刪除</button>
             </div>
           </td>
         `;
         tbody.appendChild(tr);
-      }
+      });
     }
 
     async function saveRow(code){
-      if(!isLoggedIn()) return;
-      const urlEl = document.querySelector(`.urlInput[data-code="${CSS.escape(code)}"]`);
-      const noteEl = document.querySelector(`.noteInput[data-code="${CSS.escape(code)}"]`);
-      const url = urlEl ? urlEl.value.trim() : '';
-      const note = noteEl ? noteEl.value : '';
+      const url = document.querySelector(`.urlInput[data-code="${CSS.escape(code)}"]`).value.trim();
+      const note = document.querySelector(`.noteInput[data-code="${CSS.escape(code)}"]`).value;
 
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'update');
@@ -319,47 +320,35 @@
       u.searchParams.set('url', url);
       u.searchParams.set('note', note);
 
-      setMsg('listMsg', `正在儲存 ${code}…`, '');
+      setMsg('listMsg', `更新 ${code} 中...`, '');
       try{
         const res = await jsonp(u.toString());
-        if(!res.ok) throw new Error(res.error || '更新失敗');
-        setMsg('listMsg', `已儲存：${code}`, 'ok');
-        await loadList();
-      }catch(err){
-        setMsg('listMsg', `出錯：${err.message}`, 'err');
-      }
+        if(!res.ok) throw new Error(res.error);
+        setMsg('listMsg', `已儲存更新`, 'ok');
+        loadList();
+      }catch(err){ alert('儲存失敗：' + err.message); }
     }
 
     async function deleteRow(code){
-      if(!isLoggedIn()) return;
-      if(!confirm(`確定要刪除 ${code} 嗎？此操作不可還原。`)) return;
-
+      if(!confirm(`刪除後不可恢復，確定刪除 ${code}？`)) return;
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'delete');
       u.searchParams.set('token', adminToken);
       u.searchParams.set('code', code);
 
-      setMsg('listMsg', `正在刪除 ${code}…`, '');
       try{
-        const res = await jsonp(u.toString());
-        if(!res.ok) throw new Error(res.error || '刪除失敗');
-        setMsg('listMsg', `已刪除：${code}`, 'ok');
-        await loadList();
-      }catch(err){
-        setMsg('listMsg', `出錯：${err.message}`, 'err');
-      }
+        await jsonp(u.toString());
+        loadList();
+      }catch(err){ alert('刪除失敗'); }
     }
 
     async function copyText(text){
       try{
         await navigator.clipboard.writeText(text);
-        setMsg('createMsg', '已複製：' + text, 'ok');
-      }catch(e){
-        prompt('請手動複製：', text);
-      }
+        alert('已複製到剪貼簿');
+      }catch(e){ prompt('請複製：', text); }
     }
 
-    // init
     setUI();
     if(isLoggedIn()) loadList();
   </script>
