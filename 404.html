@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecting…</title>
+</head>
+<body>
+  <p id="msg">查詢短網址中…</p>
+
+  <script>
+    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxhm9VNnRHq07QxQeSfRC3eyq0Mc50oS0UVSUDCS_cfIxhC5pMG-CC5bsqEa9h8q6LiUQ/exec';
+
+    function jsonp(url) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Math.random().toString(36).slice(2);
+        window[cb] = (data) => {
+          delete window[cb];
+          script.remove();
+          resolve(data);
+        };
+        const script = document.createElement('script');
+        script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+        script.onerror = () => reject(new Error('JSONP load failed'));
+        document.body.appendChild(script);
+      });
+    }
+
+    (async () => {
+      const msg = document.getElementById('msg');
+      const code = location.pathname.replace(/^\/+/, '').trim();
+
+      // 如果是根目錄 404（例如輸入 s.okcity.tw/ 不該來這），就回首頁
+      if (!code) {
+        location.replace('/');
+        return;
+      }
+
+      const u = new URL(GAS_ENDPOINT);
+      u.searchParams.set('action', 'resolve');
+      u.searchParams.set('code', code);
+
+      try {
+        const res = await jsonp(u.toString());
+        if (res.ok && res.url) {
+          msg.textContent = '轉址中…';
+          // 用 replace 避免使用者按返回鍵又回到這個 404
+          location.replace(res.url);
+        } else {
+          msg.textContent = '找不到這個短碼：' + code;
+        }
+      } catch (e) {
+        msg.textContent = '查詢失敗：' + e.message;
+      }
+    })();
+  </script>
+</body>
+</html>
