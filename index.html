@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>s.okcity.tw 短網址</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; }
+    input { width: 100%; padding: 12px; font-size: 16px; }
+    button { padding: 10px 14px; font-size: 16px; margin-top: 10px; }
+    .row { margin: 12px 0; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>短網址產生器</h1>
+
+  <div class="row">
+    <label>長網址（需含 https://）</label>
+    <input id="longUrl" placeholder="https://example.com/very/long/url" />
+  </div>
+
+  <div class="row">
+    <label>Token（可選；若你在 GAS 設了 WRITE_TOKEN 就必填）</label>
+    <input id="token" placeholder="token" />
+  </div>
+
+  <button onclick="createShort()">產生短網址</button>
+
+  <p id="out"></p>
+
+  <script>
+    // 1) 換成你的 GAS Web App URL
+    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxhm9VNnRHq07QxQeSfRC3eyq0Mc50oS0UVSUDCS_cfIxhC5pMG-CC5bsqEa9h8q6LiUQ/exec';
+
+    function jsonp(url) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Math.random().toString(36).slice(2);
+        window[cb] = (data) => {
+          delete window[cb];
+          script.remove();
+          resolve(data);
+        };
+        const script = document.createElement('script');
+        script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+        script.onerror = () => reject(new Error('JSONP load failed'));
+        document.body.appendChild(script);
+      });
+    }
+
+    async function createShort() {
+      const longUrl = document.getElementById('longUrl').value.trim();
+      const token = document.getElementById('token').value.trim();
+      const out = document.getElementById('out');
+      out.textContent = '處理中…';
+
+      const u = new URL(GAS_ENDPOINT);
+      u.searchParams.set('action', 'create');
+      u.searchParams.set('url', longUrl);
+      if (token) u.searchParams.set('token', token);
+
+      try {
+        const res = await jsonp(u.toString());
+        if (!res.ok) throw new Error(res.error || 'Unknown error');
+
+        const shortUrl = location.origin + '/' + res.code;
+        out.innerHTML = '完成：<a href="' + shortUrl + '" target="_blank" rel="noopener">' + shortUrl + '</a>'
+          + '<br>短碼：<code>' + res.code + '</code>';
+      } catch (e) {
+        out.textContent = '失敗：' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
