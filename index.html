@@ -13,7 +13,11 @@
     .wrap{ max-width:1080px; margin:0 auto; padding:20px 16px 80px; }
     .title{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom: 20px; }
     h1{ margin:0; font-size:20px; letter-spacing:.5px; }
+    
+    /* 修改這裡讓副標題對齊右邊 */
+    .title-header { width: 100%; display: flex; justify-content: space-between; align-items: flex-end; }
     .sub{ color:var(--muted); font-size:12px; }
+    
     .card{ margin-top:16px; background:rgba(17,26,46,.85); border:1px solid var(--line); border-radius:14px; padding:16px; }
     label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
     
@@ -31,7 +35,7 @@
       background:rgba(106,169,255,.14); color:var(--text);
       padding:12px 16px; border-radius:12px; cursor:pointer; font-weight:600; 
       text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
-      transition: 0.2s; font-size: 14px;
+      transition: 0.2s; font-size: 14px; min-width: 80px;
     }
     .btn:hover{ background:rgba(106,169,255,.22); }
     .btn:active{ transform: scale(0.98); }
@@ -75,12 +79,10 @@
     
     .url-cell { display: flex; flex-direction: column; gap: 8px; }
 
-    /* 手機版優化核心碼 */
     @media (max-width: 600px) {
       .row { grid-template-columns: 1fr; }
       .row .btn { width: 100%; }
-      
-      thead { display: none; } /* 隱藏表頭 */
+      thead { display: none; }
       table, tbody, tr, td { display: block; width: 100%; box-sizing: border-box; }
       tr { 
         margin-bottom: 16px; 
@@ -90,8 +92,6 @@
         padding: 12px;
       }
       td { border: none; padding: 8px 0; }
-      
-      /* 讓每個欄位看起來像獨立條目 */
       td::before {
         content: attr(data-label);
         display: block;
@@ -101,10 +101,8 @@
         font-weight: bold;
         text-transform: uppercase;
       }
-      
       .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .actions .btn.danger { grid-column: span 2; } /* 刪除鈕拉長防止誤觸 */
-      
+      .actions .btn.danger { grid-column: span 2; }
       .time-info { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px; margin-top: 4px; }
     }
   </style>
@@ -112,9 +110,9 @@
 <body>
   <div class="wrap">
     <div class="title">
-      <div>
+      <div class="title-header">
         <h1>OKCTㄉ短網址生成器</h1>
-        <div class="sub">首頁 <span class="pill" id="loginStatePill">此網站BY 典典</span></div>
+        <div class="sub"><span class="pill" id="loginStatePill">此網站BY 典典</span></div>
       </div>
     </div>
 
@@ -122,7 +120,7 @@
       <label>原網址（需含 https:// 或 http://）</label>
       <div class="row">
         <input id="longUrl" placeholder="貼上網址" />
-        <button class="btn" onclick="createShort()">生成短連結</button>
+        <button class="btn" onclick="createShort()">生成</button>
       </div>
       <div class="msg" id="createMsg"></div>
       <div id="createActions" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;"></div>
@@ -130,7 +128,7 @@
 
     <div class="card hidden" id="adminCard">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 15px;">
-        <div style="font-weight:700;">歷史管理</div>
+        <div style="font-weight:700;">管理</div>
         <div style="display:flex; gap:8px;">
           <button class="btn secondary" style="padding: 8px 12px;" onclick="loadList()">重新整理</button>
           <button class="btn danger" style="padding: 8px 12px;" onclick="logout()">登出</button>
@@ -144,9 +142,9 @@
           <thead>
             <tr>
               <th style="width:15%">短碼</th>
-              <th style="width:50%">目標網址 / 備註</th>
+              <th style="width:50%">網址</th>
               <th style="width:15%">紀錄</th>
-              <th style="width:20%">操作</th>
+              <th style="width:20%"> </th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -215,15 +213,31 @@
         if(!res.ok) throw new Error(res.error || '失敗');
 
         const su = shortUrlFromCode(res.code);
-        setMsg('createMsg', `成功生成！`, 'ok');
+        setMsg('createMsg', `完成！`, 'ok');
         
         document.getElementById('createActions').innerHTML = `
-          <button class="btn secondary" onclick="copyText('${su}')">複製連結</button>
+          <button class="btn secondary" onclick="copyBtnAction(this, '${su}')">複製連結</button>
           <a class="btn" href="${su}" target="_blank">直接開啟</a>
         `;
         if(isLoggedIn()) loadList();
       }catch(err){
         setMsg('createMsg', '失敗：' + err.message, 'err');
+      }
+    }
+
+    // 統一的複製按鈕文字切換處理
+    async function copyBtnAction(btn, text) {
+      const originalText = btn.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '已複製！';
+        btn.classList.add('ok');
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove('ok');
+        }, 2000);
+      } catch (e) {
+        prompt('請複製：', text);
       }
     }
 
@@ -235,7 +249,7 @@
       const pwd = prompt('管理員密碼：');
       if(!pwd) return;
       if(pwd.trim() !== ADMIN_PASSWORD){
-        alert('密碼不正確');
+        alert('密碼不對喔');
         return;
       }
       adminToken = ADMIN_PASSWORD;
@@ -253,7 +267,7 @@
 
     async function loadList(){
       if(!isLoggedIn()) return;
-      setMsg('listMsg', '同步雲端資料中...', '');
+      setMsg('listMsg', '還在跑拉...你慢慢等...', '');
 
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'list');
@@ -263,7 +277,7 @@
         const res = await jsonp(u.toString());
         if(!res.ok) throw new Error(res.error || '讀取失敗');
         renderTable(res.items || []);
-        setMsg('listMsg', `目前共有 ${res.items.length} 筆紀錄`, 'ok');
+        setMsg('listMsg', `共 ${res.items.length} 筆`, 'ok');
       }catch(err){
         setMsg('listMsg', '讀取失敗：' + err.message, 'err');
       }
@@ -282,25 +296,25 @@
         const su = shortUrlFromCode(it.code);
 
         tr.innerHTML = `
-          <td data-label="短碼 (點擊預覽)">
+          <td data-label="短碼">
             <a href="${escapeHtml(su)}" target="_blank" class="mono" style="color:var(--accent); text-decoration:none; font-weight:bold; font-size:16px;">${escapeHtml(it.code)}</a>
           </td>
-          <td data-label="目標與備註">
+          <td data-label="網址">
             <div class="url-cell">
               <input data-code="${escapeHtml(it.code)}" class="urlInput" value="${escapeHtml(it.url)}" placeholder="https://" />
               <textarea data-code="${escapeHtml(it.code)}" class="noteInput note-input" rows="2" placeholder="輸入備註內容...">${escapeHtml(it.note || '')}</textarea>
             </div>
           </td>
-          <td data-label="紀錄資訊">
+          <td data-label="update">
             <div class="time-info">
               <div class="small">建：<span class="mono">${escapeHtml((it.createdAt || '').split('T')[0])}</span></div>
               <div class="small">更：<span class="mono">${escapeHtml((it.updatedAt || '').split('T')[0])}</span></div>
             </div>
           </td>
-          <td data-label="功能操作">
+          <td data-label=" ">
             <div class="actions">
               <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存</button>
-              <button class="btn secondary" onclick="copyText('${escapeHtml(su)}')">複製</button>
+              <button class="btn secondary" onclick="copyBtnAction(this, '${escapeHtml(su)}')">複製</button>
               <button class="btn danger" onclick="deleteRow('${escapeHtml(it.code)}')">刪除</button>
             </div>
           </td>
@@ -324,7 +338,7 @@
       try{
         const res = await jsonp(u.toString());
         if(!res.ok) throw new Error(res.error);
-        setMsg('listMsg', `已儲存更新`, 'ok');
+        setMsg('listMsg', `已儲存`, 'ok');
         loadList();
       }catch(err){ alert('儲存失敗：' + err.message); }
     }
@@ -340,13 +354,6 @@
         await jsonp(u.toString());
         loadList();
       }catch(err){ alert('刪除失敗'); }
-    }
-
-    async function copyText(text){
-      try{
-        await navigator.clipboard.writeText(text);
-        alert('已複製到剪貼簿');
-      }catch(e){ prompt('請複製：', text); }
     }
 
     setUI();
