@@ -73,16 +73,16 @@
   <div class="wrap">
     <div class="title">
       <div>
-        <h1>短網址生成器</h1>
-        <div class="sub">首頁：產生短碼；短碼網址：<span class="mono">https://s.okcity.tw/xxxxxx</span></div>
+        <h1>OKCTㄉ短網址生成器</h1>
+        <div class="sub">首頁<span class="mono"> </span></div>
       </div>
       <div class="pill" id="loginStatePill">未登入</div>
     </div>
 
     <div class="card">
-      <label>長網址（需含 https:// 或 http://）</label>
+      <label>原網址（需含 https:// 或 http://）</label>
       <div class="row">
-        <input id="longUrl" placeholder="https://example.com/very/long/url" />
+        <input id="longUrl" placeholder="貼上網址" />
         <button class="btn" onclick="createShort()">生成</button>
       </div>
       <div class="msg" id="createMsg"></div>
@@ -92,8 +92,8 @@
     <div class="card hidden" id="adminCard">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
         <div>
-          <div style="font-weight:700;">管理：歷史紀錄</div>
-          <div class="small">可編輯 URL / note；更新會直接寫回試算表。</div>
+          <div style="font-weight:700;">歷史紀錄</div>
+          <div class="small">在此設置</div>
         </div>
         <div style="display:flex; gap:10px;">
           <button class="btn secondary" onclick="loadList()">重新整理</button>
@@ -124,7 +124,7 @@
   <div class="login-fab" onclick="toggleLogin()" title="登入/登出">
     <span>🔑</span>
   </div>
-  <div class="badge" id="badge">點左下角登入</div>
+  <div class="badge" id="badge"> </div>
 
   <script>
     /***************
