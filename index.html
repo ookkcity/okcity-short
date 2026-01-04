@@ -146,7 +146,7 @@
     function setUI(){
       document.getElementById('adminCard').classList.toggle('hidden', !isLoggedIn());
       document.getElementById('loginStatePill').textContent = isLoggedIn() ? '已登入' : '未登入';
-      document.getElementById('badge').textContent = isLoggedIn() ? '管理模式' : ' ';
+      document.getElementById('badge').textContent = isLoggedIn() ? '管理模式' : '';
     }
 
     /***************
@@ -182,7 +182,7 @@
      ***************/
     async function createShort(){
       const longUrl = document.getElementById('longUrl').value.trim();
-      setMsg('createMsg', '處理中…', '');
+      setMsg('createMsg', '正在搞…別催…', '');
       document.getElementById('createActions').innerHTML = '';
 
       const u = new URL(GAS_ENDPOINT);
@@ -250,7 +250,7 @@
     async function loadList(){
       if(!isLoggedIn()) return;
 
-      setMsg('listMsg', '載入中…', '');
+      setMsg('listMsg', '還在跑你慢慢等…', '');
 
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'list');
@@ -288,7 +288,7 @@
         tr.innerHTML = `
           <td class="mono">
             <div><a href="${escapeHtml(su)}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none;">${escapeHtml(it.code)}</a></div>
-            <div class="small">→ 連結</div>
+            <div class="small">→ 開啟</div>
           </td>
 
           <td>
