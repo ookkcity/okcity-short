@@ -13,27 +13,25 @@
     .wrap{ max-width:1080px; margin:0 auto; padding:20px 16px 80px; }
     .title{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom: 20px; }
     h1{ margin:0; font-size:20px; letter-spacing:.5px; }
-    
-    /* 修改這裡讓副標題對齊右邊 */
     .title-header { width: 100%; display: flex; justify-content: space-between; align-items: flex-end; }
     .sub{ color:var(--muted); font-size:12px; }
-    
+
     .card{ margin-top:16px; background:rgba(17,26,46,.85); border:1px solid var(--line); border-radius:14px; padding:16px; }
     label{ display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
-    
+
     input, textarea{
       width:100%; box-sizing:border-box; border-radius:12px; border:1px solid var(--line);
       background:#0b1326; color:var(--text); padding:12px; font-size:15px;
       outline:none; appearance: none;
     }
     input:focus, textarea:focus{ border-color:rgba(106,169,255,.7); box-shadow:0 0 0 3px rgba(106,169,255,.15); }
-    
+
     .row{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end; }
-    
+
     .btn{
       border:1px solid rgba(106,169,255,.45);
       background:rgba(106,169,255,.14); color:var(--text);
-      padding:12px 16px; border-radius:12px; cursor:pointer; font-weight:600; 
+      padding:12px 16px; border-radius:12px; cursor:pointer; font-weight:600;
       text-decoration:none; display:inline-flex; align-items:center; justify-content:center;
       transition: 0.2s; font-size: 14px; min-width: 80px;
     }
@@ -41,7 +39,7 @@
     .btn:active{ transform: scale(0.98); }
     .btn.secondary{ border-color:rgba(170,182,214,.35); background:rgba(170,182,214,.10); }
     .btn.danger{ border-color:rgba(255,106,122,.45); background:rgba(255,106,122,.12); }
-    
+
     .msg{ margin-top:10px; font-size:13px; color:var(--muted); min-height: 18px; }
     .msg.ok{ color:var(--ok); }
     .msg.err{ color:var(--danger); }
@@ -76,7 +74,6 @@
     .actions{ display:flex; gap:8px; flex-wrap:wrap; }
     .pill{ display:inline-block; padding:2px 8px; border:1px solid rgba(170,182,214,.25); border-radius:999px; color:var(--muted); font-size:11px; }
     .hidden{ display:none !important; }
-    
     .url-cell { display: flex; flex-direction: column; gap: 8px; }
 
     @media (max-width: 600px) {
@@ -84,10 +81,10 @@
       .row .btn { width: 100%; }
       thead { display: none; }
       table, tbody, tr, td { display: block; width: 100%; box-sizing: border-box; }
-      tr { 
-        margin-bottom: 16px; 
-        border: 1px solid var(--line); 
-        border-radius: 14px; 
+      tr {
+        margin-bottom: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
         background: rgba(255,255,255,0.02);
         padding: 12px;
       }
@@ -141,9 +138,9 @@
         <table id="listTable">
           <thead>
             <tr>
-              <th style="width:15%">短碼</th>
-              <th style="width:50%">網址</th>
-              <th style="width:15%">紀錄</th>
+              <th style="width:18%">短碼</th>
+              <th style="width:44%">網址</th>
+              <th style="width:18%">紀錄</th>
               <th style="width:20%"> </th>
             </tr>
           </thead>
@@ -159,8 +156,12 @@
   <div class="badge" id="badge">ok._.city</div>
 
   <script>
+    // 換成你「同一支」GAS 部署 exec 連結（主頁 & 404 要一致）
     const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzBFIRbeQrTtZvplIrMdaduZefCireEWnhJoEf4NjUydJOO8oJx4H3MKEGPt2HSpuhe3g/exec';
-    const ADMIN_PASSWORD = '123'; 
+
+    // 前端假密碼（注意：這是公開的；真正安全要後端權限控管）
+    const ADMIN_PASSWORD = '123';
+
     const storageKey = 'okcity_short_admin_token';
     let adminToken = localStorage.getItem(storageKey) || '';
 
@@ -187,8 +188,16 @@
       });
     }
 
+    // 兼容根目錄/子路徑（GitHub Pages /repo/）
+    function getBasePath(){
+      const p = location.pathname;
+      if (p.endsWith('.html')) return p.replace(/\/[^\/]*$/, ''); // 去掉檔名
+      return p.replace(/\/$/, '');
+    }
+
     function shortUrlFromCode(code){
-      return location.origin.replace(/\/$/, '') + '/' + code;
+      const basePath = getBasePath();
+      return location.origin.replace(/\/$/, '') + basePath + '/' + code;
     }
 
     function setMsg(id, text, type){
@@ -200,7 +209,7 @@
     async function createShort(){
       const longUrl = document.getElementById('longUrl').value.trim();
       if(!longUrl) return alert('請輸入網址');
-      
+
       setMsg('createMsg', '正在生成中...', '');
       document.getElementById('createActions').innerHTML = '';
 
@@ -214,7 +223,7 @@
 
         const su = shortUrlFromCode(res.code);
         setMsg('createMsg', `完成！`, 'ok');
-        
+
         document.getElementById('createActions').innerHTML = `
           <button class="btn secondary" onclick="copyBtnAction(this, '${su}')">複製連結</button>
           <a class="btn" href="${su}" target="_blank">直接開啟</a>
@@ -225,17 +234,12 @@
       }
     }
 
-    // 統一的複製按鈕文字切換處理
     async function copyBtnAction(btn, text) {
       const originalText = btn.textContent;
       try {
         await navigator.clipboard.writeText(text);
         btn.textContent = '已複製！';
-        btn.classList.add('ok');
-        setTimeout(() => {
-          btn.textContent = originalText;
-          btn.classList.remove('ok');
-        }, 2000);
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
       } catch (e) {
         prompt('請複製：', text);
       }
@@ -284,7 +288,7 @@
     }
 
     function escapeHtml(s){
-      return String(s || "").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return String(s || "").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function renderTable(items){
@@ -297,23 +301,34 @@
 
         tr.innerHTML = `
           <td data-label="短碼">
-            <a href="${escapeHtml(su)}" target="_blank" class="mono" style="color:var(--accent); text-decoration:none; font-weight:bold; font-size:16px;">${escapeHtml(it.code)}</a>
+            <div class="url-cell">
+              <input data-oldcode="${escapeHtml(it.code)}" class="codeInput mono"
+                     value="${escapeHtml(it.code)}" placeholder="短碼(可改)" />
+              <a href="${escapeHtml(su)}" target="_blank" class="mono"
+                 style="color:var(--accent); text-decoration:none; font-weight:bold;">
+                 開啟目前短連結
+              </a>
+            </div>
           </td>
+
           <td data-label="網址">
             <div class="url-cell">
               <input data-code="${escapeHtml(it.code)}" class="urlInput" value="${escapeHtml(it.url)}" placeholder="https://" />
               <textarea data-code="${escapeHtml(it.code)}" class="noteInput note-input" rows="2" placeholder="輸入備註內容...">${escapeHtml(it.note || '')}</textarea>
             </div>
           </td>
+
           <td data-label="update">
             <div class="time-info">
               <div class="small">建：<span class="mono">${escapeHtml((it.createdAt || '').split('T')[0])}</span></div>
               <div class="small">更：<span class="mono">${escapeHtml((it.updatedAt || '').split('T')[0])}</span></div>
             </div>
           </td>
+
           <td data-label=" ">
             <div class="actions">
               <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存</button>
+              <button class="btn secondary" onclick="renameRow('${escapeHtml(it.code)}')">改短碼</button>
               <button class="btn secondary" onclick="copyBtnAction(this, '${escapeHtml(su)}')">複製</button>
               <button class="btn danger" onclick="deleteRow('${escapeHtml(it.code)}')">刪除</button>
             </div>
@@ -323,9 +338,51 @@
       });
     }
 
+    async function renameRow(oldCode){
+      const codeEl = document.querySelector(`.codeInput[data-oldcode="${CSS.escape(oldCode)}"]`);
+      if(!codeEl) return alert('找不到短碼輸入欄位');
+
+      const newCode = codeEl.value.trim();
+      if(!newCode) return alert('請輸入新短碼');
+
+      // 與後端一致：純數字短碼
+      if(!/^\d+$/.test(newCode)) return alert('短碼格式錯誤：目前只允許數字');
+
+      if(newCode === oldCode){
+        setMsg('listMsg', '短碼未變更', '');
+        return;
+      }
+
+      if(!confirm(`確定要把短碼 ${oldCode} 改成 ${newCode}？\n改完舊短碼將失效`)) {
+        codeEl.value = oldCode;
+        return;
+      }
+
+      const u = new URL(GAS_ENDPOINT);
+      u.searchParams.set('action', 'rename');
+      u.searchParams.set('token', adminToken);
+      u.searchParams.set('oldCode', oldCode);
+      u.searchParams.set('newCode', newCode);
+
+      setMsg('listMsg', `修改短碼中：${oldCode} → ${newCode}`, '');
+      try{
+        const res = await jsonp(u.toString());
+        if(!res.ok) throw new Error(res.error || 'rename failed');
+        setMsg('listMsg', `已修改短碼：${oldCode} → ${newCode}`, 'ok');
+        loadList();
+      }catch(err){
+        alert('修改短碼失敗：' + err.message);
+        codeEl.value = oldCode;
+      }
+    }
+
     async function saveRow(code){
-      const url = document.querySelector(`.urlInput[data-code="${CSS.escape(code)}"]`).value.trim();
-      const note = document.querySelector(`.noteInput[data-code="${CSS.escape(code)}"]`).value;
+      const urlEl = document.querySelector(`.urlInput[data-code="${CSS.escape(code)}"]`);
+      const noteEl = document.querySelector(`.noteInput[data-code="${CSS.escape(code)}"]`);
+      if(!urlEl || !noteEl) return alert('找不到欄位');
+
+      const url = urlEl.value.trim();
+      const note = noteEl.value;
 
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'update');
@@ -340,20 +397,26 @@
         if(!res.ok) throw new Error(res.error);
         setMsg('listMsg', `已儲存`, 'ok');
         loadList();
-      }catch(err){ alert('儲存失敗：' + err.message); }
+      }catch(err){
+        alert('儲存失敗：' + err.message);
+      }
     }
 
     async function deleteRow(code){
       if(!confirm(`刪除後不可恢復，確定刪除 ${code}？`)) return;
+
       const u = new URL(GAS_ENDPOINT);
       u.searchParams.set('action', 'delete');
       u.searchParams.set('token', adminToken);
       u.searchParams.set('code', code);
 
       try{
-        await jsonp(u.toString());
+        const res = await jsonp(u.toString());
+        if(!res.ok) throw new Error(res.error || 'delete failed');
         loadList();
-      }catch(err){ alert('刪除失敗'); }
+      }catch(err){
+        alert('刪除失敗：' + err.message);
+      }
     }
 
     setUI();
