@@ -341,7 +341,8 @@
       const newCode = codeEl.value.trim();
       if(!newCode) return alert('請輸入新短碼');
 
-      if(!/^[A-Za-z0-9]+$/.test(newCode)) return alert('短碼格式錯誤：只允許英數');
+      // ✅ 改成 4 碼純數字
+      if(!/^\d{4}$/.test(newCode)) return alert('短碼格式錯誤：需為4碼數字');
 
       if(newCode === oldCode){
         setMsg('listMsg', '短碼未變更', '');
