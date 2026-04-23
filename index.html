@@ -183,14 +183,14 @@
       });
     }
 
-    // ✅ for GitHub Pages 根目錄/子路徑
+    // 支援 GitHub Pages 根目錄/子路徑
     function getBasePath(){
       const p = location.pathname;
       if (p.endsWith('.html')) return p.replace(/\/[^\/]*$/, '');
       return p.replace(/\/$/, '');
     }
 
-    // ✅ 方案2：產生自家網域短路徑
+    // 方案2：短網址輸出成自家網域路徑（/code）
     function shortUrlFromCode(code){
       const basePath = getBasePath();
       return location.origin.replace(/\/$/, '') + basePath + '/' + encodeURIComponent(code);
@@ -283,4 +283,139 @@
       }
     }
 
-    function escapeHtml
+    function escapeHtml(s){
+      return String(s || "").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function renderTable(items){
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+
+      items.forEach(it => {
+        const tr = document.createElement('tr');
+        const su = shortUrlFromCode(it.code);
+
+        tr.innerHTML = `
+          <td data-label="短碼">
+            <div class="url-cell">
+              <input data-oldcode="${escapeHtml(it.code)}" class="codeInput mono"
+                     value="${escapeHtml(it.code)}" placeholder="短碼(可改)" />
+              <a href="${escapeHtml(su)}" target="_blank" class="mono"
+                 style="color:var(--accent); text-decoration:none; font-weight:bold;">
+                 開啟目前短連結
+              </a>
+            </div>
+          </td>
+
+          <td data-label="網址">
+            <div class="url-cell">
+              <input data-code="${escapeHtml(it.code)}" class="urlInput" value="${escapeHtml(it.url)}" placeholder="https://" />
+              <textarea data-code="${escapeHtml(it.code)}" class="noteInput note-input" rows="2" placeholder="輸入備註內容...">${escapeHtml(it.note || '')}</textarea>
+            </div>
+          </td>
+
+          <td data-label="update">
+            <div class="time-info">
+              <div class="small">建：<span class="mono">${escapeHtml((it.createdAt || '').split('T')[0])}</span></div>
+              <div class="small">更：<span class="mono">${escapeHtml((it.updatedAt || '').split('T')[0])}</span></div>
+            </div>
+          </td>
+
+          <td data-label=" ">
+            <div class="actions">
+              <button class="btn" onclick="saveRow('${escapeHtml(it.code)}')">儲存</button>
+              <button class="btn secondary" onclick="renameRow('${escapeHtml(it.code)}')">改短碼</button>
+              <button class="btn secondary" onclick="copyBtnAction(this, '${escapeHtml(su)}')">複製</button>
+              <button class="btn danger" onclick="deleteRow('${escapeHtml(it.code)}')">刪除</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function renameRow(oldCode){
+      const codeEl = document.querySelector(`.codeInput[data-oldcode="${CSS.escape(oldCode)}"]`);
+      if(!codeEl) return alert('找不到短碼輸入欄位');
+
+      const newCode = codeEl.value.trim();
+      if(!newCode) return alert('請輸入新短碼');
+
+      if(!/^[A-Za-z0-9]+$/.test(newCode)) return alert('短碼格式錯誤：只允許英數');
+
+      if(newCode === oldCode){
+        setMsg('listMsg', '短碼未變更', '');
+        return;
+      }
+
+      if(!confirm(`確定要把短碼 ${oldCode} 改成 ${newCode}？\n改完舊短碼將失效`)) {
+        codeEl.value = oldCode;
+        return;
+      }
+
+      const u = new URL(GAS_ENDPOINT);
+      u.searchParams.set('action', 'rename');
+      u.searchParams.set('token', adminToken);
+      u.searchParams.set('oldCode', oldCode);
+      u.searchParams.set('newCode', newCode);
+
+      setMsg('listMsg', `修改短碼中：${oldCode} → ${newCode}`, '');
+      try{
+        const res = await jsonp(u.toString());
+        if(!res.ok) throw new Error(res.error || 'rename failed');
+        setMsg('listMsg', `已修改短碼：${oldCode} → ${newCode}`, 'ok');
+        loadList();
+      }catch(err){
+        alert('修改短碼失敗：' + err.message);
+        codeEl.value = oldCode;
+      }
+    }
+
+    async function saveRow(code){
+      const urlEl = document.querySelector(`.urlInput[data-code="${CSS.escape(code)}"]`);
+      const noteEl = document.querySelector(`.noteInput[data-code="${CSS.escape(code)}"]`);
+      if(!urlEl || !noteEl) return alert('找不到欄位');
+
+      const url = urlEl.value.trim();
+      const note = noteEl.value;
+
+      const u = new URL(GAS_ENDPOINT);
+      u.searchParams.set('action', 'update');
+      u.searchParams.set('token', adminToken);
+      u.searchParams.set('code', code);
+      u.searchParams.set('url', url);
+      u.searchParams.set('note', note);
+
+      setMsg('listMsg', `更新 ${code} 中...`, '');
+      try{
+        const res = await jsonp(u.toString());
+        if(!res.ok) throw new Error(res.error);
+        setMsg('listMsg', `已儲存`, 'ok');
+        loadList();
+      }catch(err){
+        alert('儲存失敗：' + err.message);
+      }
+    }
+
+    async function deleteRow(code){
+      if(!confirm(`刪除後不可恢復，確定刪除 ${code}？`)) return;
+
+      const u = new URL(GAS_ENDPOINT);
+      u.searchParams.set('action', 'delete');
+      u.searchParams.set('token', adminToken);
+      u.searchParams.set('code', code);
+
+      try{
+        const res = await jsonp(u.toString());
+        if(!res.ok) throw new Error(res.error || 'delete failed');
+        loadList();
+      }catch(err){
+        alert('刪除失敗：' + err.message);
+      }
+    }
+
+    setUI();
+    if(isLoggedIn()) loadList();
+  </script>
+</body>
+</html>
